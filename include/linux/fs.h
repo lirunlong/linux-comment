@@ -322,16 +322,22 @@ struct writeback_control;
 struct kiocb;
 
 struct address_space_operations {
+	/*写操作(从页写道所有者的磁盘映像)*/
 	int (*writepage)(struct page *page, struct writeback_control *wbc);
+	/*读操作(从所有者的磁盘映像读到页)*/
 	int (*readpage)(struct file *, struct page *);
+	/*如果所有者页进行的操作已准备好，则立刻开始I/O数据的传输*/
 	int (*sync_page)(struct page *);
 
 	/* Write back some dirty pages from this mapping. */
+	/*把指定数量的所有者脏页写回磁盘*/
 	int (*writepages)(struct address_space *, struct writeback_control *);
 
 	/* Set a page dirty */
+	/*把所有者的页设置为脏页*/
 	int (*set_page_dirty)(struct page *page);
 
+	/*从磁盘中读所有者页的链表*/
 	int (*readpages)(struct file *filp, struct address_space *mapping,
 			struct list_head *pages, unsigned nr_pages);
 
@@ -339,12 +345,18 @@ struct address_space_operations {
 	 * ext3 requires that a successful prepare_write() call be followed
 	 * by a commit_write() call - they must be balanced
 	 */
+	/*为写操作做准备(由磁盘文件系统使用)*/
 	int (*prepare_write)(struct file *, struct page *, unsigned, unsigned);
+	/*完成写操作(由磁盘文件系统使用)*/
 	int (*commit_write)(struct file *, struct page *, unsigned, unsigned);
 	/* Unfortunately this kludge is needed for FIBMAP. Don't use it */
+	/*从文件块索引中获取逻辑块号*/
 	sector_t (*bmap)(struct address_space *, sector_t);
+	/*使所有者的页无效(截断文件时使用)*/
 	int (*invalidatepage) (struct page *, unsigned long);
+	/*由日志文件系统使用以准备释放页*/
 	int (*releasepage) (struct page *, int);
+	/*所有者页的直接I/O传输(绕过页高速缓存)*/
 	ssize_t (*direct_IO)(int, struct kiocb *, const struct iovec *iov,
 			loff_t offset, unsigned long nr_segs);
 };

@@ -119,6 +119,7 @@ void __remove_from_page_cache(struct page *page)
 	pagecache_acct(-1);
 }
 
+/*从页高速缓存中删除页描述符*/
 void remove_from_page_cache(struct page *page)
 {
 	struct address_space *mapping = page->mapping;
@@ -343,6 +344,7 @@ int filemap_write_and_wait(struct address_space *mapping)
  *
  * This function does not add the page to the LRU.  The caller must do that.
  */
+/*把一个新页的描述符插入到页高速缓存*/
 int add_to_page_cache(struct page *page, struct address_space *mapping,
 		pgoff_t offset, int gfp_mask)
 {
