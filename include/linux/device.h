@@ -254,39 +254,58 @@ extern int class_simple_set_hotplug(struct class_simple *,
 extern void class_simple_device_remove(dev_t dev);
 
 
+/*所有的device对象都收集在devices_subsys子系统中*/
 struct device {
+	/*指向兄弟设备链表的指针*/
 	struct list_head node;		/* node in sibling list */
+	/*指向连于同一类型总线上的设备链表的指针*/
 	struct list_head bus_list;	/* node in bus's list */
+	/*指向设备驱动程序链表的指针*/
 	struct list_head driver_list;
+	/*子设备链表的首部*/
 	struct list_head children;
+	/*指向父设备的指针*/
 	struct device 	* parent;
 
+	/*内嵌的kobject结构*/
 	struct kobject kobj;
+	/*链接到总线上设备的位置*/
 	char	bus_id[BUS_ID_SIZE];	/* position on parent bus */
 
+	/*指向所连接总线的指针*/
 	struct bus_type	* bus;		/* type of bus device is on */
+	/*指向控制设备驱动程序的指针*/
 	struct device_driver *driver;	/* which driver has allocated this
 					   device */
+	/*指向驱动程序私有数据的指针*/
 	void		*driver_data;	/* data private to the driver */
+	/*指向遗留设备驱动程序的私有数据的指针*/
 	void		*platform_data;	/* Platform specific data (e.g. ACPI,
 					   BIOS data relevant to device) */
+	/*电源管理信息*/
 	struct dev_pm_info	power;
 
+	/*卸载设备驱动程序时电源进入的状态*/
 	u32		detach_state;	/* State to enter when device is
 					   detached from its driver. */
 
+	/*指向设备的dma屏蔽字的指针*/
 	u64		*dma_mask;	/* dma mask (if dma'able device) */
+	/*设备的一致性dma的屏蔽字*/
 	u64		coherent_dma_mask;/* Like dma_mask, but for
 					     alloc_coherent mappings as
 					     not all hardware supports
 					     64 bit addresses for consistent
 					     allocations such descriptors. */
 
+	/*聚集的dma缓冲池链表的首部*/
 	struct list_head	dma_pools;	/* dma pools (if dma'ble) */
 
+	/*指向设备所使用的一致性dma存储器描述符的指针*/
 	struct dma_coherent_mem	*dma_mem; /* internal for coherent mem
 					     override */
 
+	/*释放设备描述符的回调函数*/
 	void	(*release)(struct device * dev);
 };
 
