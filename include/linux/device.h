@@ -47,21 +47,33 @@ struct class;
 struct class_device;
 struct class_simple;
 
+/*bus_subsys子系统*/
 struct bus_type {
+	/*总线类型的名称*/
 	char			* name;
 
+	/*与总线类型相关的kobject子系统*/
 	struct subsystem	subsys;
+	/*驱动程序的kobject集合*/
 	struct kset		drivers;
+	/*设备的kobject 集合*/
 	struct kset		devices;
 
+	/*指向对象的指针，该对象包含总线属性和用于导出此属性的sysfs文件系统的方法*/
 	struct bus_attribute	* bus_attrs;
+	/*指向对象的指针，该对象包含设备属性和用于导出此属性到sysfs文件系统的方法*/
 	struct device_attribute	* dev_attrs;
+	/*指向对象的指针，该对象包含设备驱动程序属性和用于导出此属性到sysfs文件系统的方法*/
 	struct driver_attribute	* drv_attrs;
 
+	/*检验给定的设备驱动程序是否支持特定的设备的方法*/
 	int		(*match)(struct device * dev, struct device_driver * drv);
+	/*注册设备时调用的方法*/
 	int		(*hotplug) (struct device *dev, char **envp, 
 				    int num_envp, char *buffer, int buffer_size);
+	/*保存硬件设备的上下文状态 并改变设备供电状态的方法*/
 	int		(*suspend)(struct device * dev, pm_message_t state);
+	/*改变供电状态和恢复硬件设备上下文的方法*/
 	int		(*resume)(struct device * dev);
 };
 
@@ -99,19 +111,29 @@ extern int bus_create_file(struct bus_type *, struct bus_attribute *);
 extern void bus_remove_file(struct bus_type *, struct bus_attribute *);
 
 struct device_driver {
+	/*设备驱动程序的名称*/
 	char			* name;
+	/*指向总线描述符的指针，总线链接所支持的设备*/
 	struct bus_type		* bus;
 
+	/*禁止卸载设备驱动程序的信号量；当引用计数器的值为0时释放该信号量*/
 	struct semaphore	unload_sem;
 	struct kobject		kobj;
+	/*驱动程序支持的所有设备组成的链表的首部*/
 	struct list_head	devices;
 
+	/*标识实现设备驱动程序的模块，如果有的话*/
 	struct module 		* owner;
 
+	/*探测设备的方法*/
 	int	(*probe)	(struct device * dev);
+	/*一走设备时调用的方法*/
 	int 	(*remove)	(struct device * dev);
+	/*设备断电时调用的方法*/
 	void	(*shutdown)	(struct device * dev);
+	/*设备置于低功率状态时所调用的方法*/
 	int	(*suspend)	(struct device * dev, u32 state, u32 level);
+	/*设备恢复正常状态时所调用的方法*/
 	int	(*resume)	(struct device * dev, u32 level);
 };
 
@@ -142,6 +164,7 @@ extern void driver_remove_file(struct device_driver *, struct driver_attribute *
 /*
  * device classes
  */
+/*class_subsys*/
 struct class {
 	char			* name;
 

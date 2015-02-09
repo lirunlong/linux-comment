@@ -133,6 +133,7 @@ static struct kobj_type ktype_bus = {
 
 };
 
+/*定义bus_subsys子系统  对应/sys/bus/目录*/
 decl_subsys(bus, &ktype_bus, NULL);
 
 static int __bus_for_each_dev(struct bus_type *bus, struct device *start,

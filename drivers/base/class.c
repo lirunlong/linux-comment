@@ -69,6 +69,7 @@ static struct kobj_type ktype_class = {
 };
 
 /* Hotplug events for classes go to the class_obj subsys */
+/*定义class_subsys子系统 对应目录/sys/class/ */
 static decl_subsys(class, &ktype_class, NULL);
 
 

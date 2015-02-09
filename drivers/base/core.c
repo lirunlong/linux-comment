@@ -209,6 +209,7 @@ void device_remove_file(struct device * dev, struct device_attribute * attr)
 
 void device_initialize(struct device *dev)
 {
+	/*设置dev的kset为父kset*/
 	kobj_set_kset_s(dev, devices_subsys);
 	kobject_init(&dev->kobj);
 	INIT_LIST_HEAD(&dev->node);
@@ -287,6 +288,7 @@ int device_add(struct device *dev)
  *	before it is added to the hierarchy.
  */
 
+/*往设备驱动程序模型中插入一个新的device对象，并自动在/sys/devices/目录下为其创建一个新的目录*/
 int device_register(struct device *dev)
 {
 	device_initialize(dev);

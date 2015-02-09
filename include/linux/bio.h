@@ -70,6 +70,7 @@ typedef void (bio_destructor_t) (struct bio *);
  * main unit of I/O for the block layer and lower layers (ie drivers and
  * stacking drivers)
  */
+/*一个bio请求一组连续的硬盘块，如果数据在不连续的块上，则需要启动多次bio操作*/
 struct bio {
 	/*块I/O操作的第一个磁盘扇区*/
 	sector_t		bi_sector;

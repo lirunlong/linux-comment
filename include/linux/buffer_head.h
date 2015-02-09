@@ -51,13 +51,17 @@ struct buffer_head {
 	/* First cache line: */
 	unsigned long b_state;		/* buffer state bitmap (see above) */
 	struct buffer_head *b_this_page;/* circular list of page's buffers */
+	/*块缓冲区所在页框的页描述符地址*/
 	struct page *b_page;		/* the page this bh is mapped to */
 	atomic_t b_count;		/* users using this block */
 	u32 b_size;			/* block size */
 
+	/*逻辑块号*/
 	sector_t b_blocknr;		/* block number */
+	/*如果页框位于高度内存，b_data字段存放页中块缓冲区的偏移量，否则存放缓冲区本身的起始先行地址*/
 	char *b_data;			/* pointer to data block */
 
+	/*缓冲区首部的块设备*/
 	struct block_device *b_bdev;
 	bh_end_io_t *b_end_io;		/* I/O completion */
  	void *b_private;		/* reserved for b_end_io */
