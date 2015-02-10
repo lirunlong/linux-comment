@@ -6,30 +6,51 @@
 #define PIPE_BUFFERS (16)
 
 struct pipe_buffer {
+	/*管道缓冲区页框的描述符地址*/
 	struct page *page;
+	/*offset:页框内有效数据的当前位置
+	 *len:页框内有效数据的长度*/
 	unsigned int offset, len;
+	/*管道缓冲区方法表的地址(管道缓冲区空时为NULL) 实际指向anon_pipe_buf_ops*/
 	struct pipe_buf_operations *ops;
 };
 
 struct pipe_buf_operations {
 	int can_merge;
+	/*在访问缓冲区数据之前调用。它只在管道缓冲区在高端内存时对管道缓冲区页框调用kmap*/
 	void * (*map)(struct file *, struct pipe_inode_info *, struct pipe_buffer *);
+	/*不再访问缓冲区数据时调用。它对管道缓冲区页框调用kunmap*/
 	void (*unmap)(struct pipe_inode_info *, struct pipe_buffer *);
+	/*当释放管道缓冲区时调用。该方法实现了一个单页内存高速缓存：释放的不是存放缓冲区的那个页框，而是由pipe_inode_info数据结构
+	 * (如果不是null)的tmp_page字段直线的高速缓存页框。存放缓冲区的页框变成新的高速缓存页框*/
 	void (*release)(struct pipe_inode_info *, struct pipe_buffer *);
 };
 
 struct pipe_inode_info {
+	/*管道/FIFO等待队列*/
 	wait_queue_head_t wait;
+	/*nrbufs:包含待读数据的缓冲区数
+	 *curbuf:包含待读数据的第一个缓冲区的索引*/
 	unsigned int nrbufs, curbuf;
+	/*管道缓冲区描述符数组*/
 	struct pipe_buffer bufs[PIPE_BUFFERS];
+	/*高速缓存页框指针*/
 	struct page *tmp_page;
+	/*当前管道缓冲区读的位置*/
 	unsigned int start;
+	/*读进程的标志(或编号)*/
 	unsigned int readers;
+	/*写进程的标志(或编号)*/
 	unsigned int writers;
+	/*在等待队列中睡眠的写进程的个数*/
 	unsigned int waiting_writers;
+	/*与readers类似，但当等待读取FIFO的进程时使用*/
 	unsigned int r_counter;
+	/*与writers类似，但当等待写入FIFO的进程时使用*/
 	unsigned int w_counter;
+	/*用于通过信号进行的异步I/O通知*/
 	struct fasync_struct *fasync_readers;
+	/*用于通过信号进行的异步I/O通知*/
 	struct fasync_struct *fasync_writers;
 };
 

@@ -125,6 +125,7 @@ pipe_readv(struct file *filp, const struct iovec *_iov,
 	struct iovec *iov = (struct iovec *)_iov;
 	size_t total_len;
 
+	/*读缓冲区总大小*/
 	total_len = iov_length(iov, nr_segs);
 	/* Null read succeeds. */
 	if (unlikely(total_len == 0))
@@ -135,6 +136,7 @@ pipe_readv(struct file *filp, const struct iovec *_iov,
 	down(PIPE_SEM(*inode));
 	info = inode->i_pipe;
 	for (;;) {
+		/*可读的缓冲区的大小*/
 		int bufs = info->nrbufs;
 		if (bufs) {
 			int curbuf = info->curbuf;
@@ -159,6 +161,7 @@ pipe_readv(struct file *filp, const struct iovec *_iov,
 			buf->len -= chars;
 			if (!buf->len) {
 				buf->ops = NULL;
+				/*如果当前缓冲区读完  则调用release  释放掉当前页框*/
 				ops->release(info, buf);
 				curbuf = (curbuf + 1) & (PIPE_BUFFERS-1);
 				info->curbuf = curbuf;
@@ -235,6 +238,7 @@ pipe_writev(struct file *filp, const struct iovec *_iov,
 	down(PIPE_SEM(*inode));
 	info = inode->i_pipe;
 
+	/*如果读端关闭  则给当前进程发送一个sigpipe信号*/
 	if (!PIPE_READERS(*inode)) {
 		send_sig(SIGPIPE, current, 0);
 		ret = -EPIPE;
@@ -272,6 +276,7 @@ pipe_writev(struct file *filp, const struct iovec *_iov,
 		bufs = info->nrbufs;
 		if (bufs < PIPE_BUFFERS) {
 			ssize_t chars;
+			/*找到第一个可写的buf的索引*/
 			int newbuf = (info->curbuf + bufs) & (PIPE_BUFFERS-1);
 			struct pipe_buffer *buf = info->bufs + newbuf;
 			struct page *page = info->tmp_page;
@@ -321,6 +326,7 @@ pipe_writev(struct file *filp, const struct iovec *_iov,
 			if (!ret) ret = -EAGAIN;
 			break;
 		}
+		/*如果当前有未处理的信号， 并且没有写任何数据， 则返回-ERESTARTSYS,在do_signal中根据情况决定是否重启系统调用*/
 		if (signal_pending(current)) {
 			if (!ret) ret = -ERESTARTSYS;
 			break;
@@ -330,6 +336,7 @@ pipe_writev(struct file *filp, const struct iovec *_iov,
 			kill_fasync(PIPE_FASYNC_READERS(*inode), SIGIO, POLL_IN);
 			do_wakeup = 0;
 		}
+		/*写段阻塞*/
 		PIPE_WAITING_WRITERS(*inode)++;
 		pipe_wait(inode);
 		PIPE_WAITING_WRITERS(*inode)--;
