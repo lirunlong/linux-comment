@@ -128,23 +128,33 @@ struct request {
 
 	/*要传送的下一个扇区号*/
 	sector_t hard_sector;		/* next sector to complete */
+	/*整个请求中要传送的扇区数(由通用块层更新)*/
 	unsigned long hard_nr_sectors;	/* no. of sectors left to complete */
 	/* no. of sectors left to complete in the current segment */
+	/*当前bio的当前段中要传送的扇区数(由通用块层更新)*/
 	unsigned int hard_cur_sectors;
 
+	/*请求中第一个没有完成传送操作的bio*/
 	struct bio *bio;
+	/*请求链表中末尾的bio*/
 	struct bio *biotail;
 
+	/*指向I/O调度程序私有数据的指针*/
 	void *elevator_private;
 
+	/*请求状态:实际上，或者是RQ_ACTIVE,或者是RQ_INACTIVE*/
 	int rq_status;	/* should split this into a few status bits */
+	/*请求所引用的磁盘描述符*/
 	struct gendisk *rq_disk;
+	/*用于记录当前传送中发生的I/O失败次数的计数器*/
 	int errors;
+	/*请求的起始时间jiffies*/
 	unsigned long start_time;
 
 	/* Number of scatter-gather DMA addr+len pairs after
 	 * physical address coalescing is performed.
 	 */
+	/*请求的物理段数*/
 	unsigned short nr_phys_segments;
 
 	/* Number of scatter-gather addr+len pairs after
@@ -152,35 +162,51 @@ struct request {
 	 * This is the number of scatter-gather entries the driver
 	 * will actually have to deal with after DMA mapping is done.
 	 */
+	/*请求的硬段数*/
 	unsigned short nr_hw_segments;
 
+	/*与请求相关的标记(只支持多次数据传送的硬件设备)*/
 	int tag;
+	/*指向当前数据传送的内存缓冲区的指针(如果缓冲区是高端内存区，则为NULL）*/
 	char *buffer;
 
+	/*请求的引用计数器*/
 	int ref_count;
+	/*指向包含请求的请求队列描述符的指针*/
 	request_queue_t *q;
+	/*指向request_list结构的指针*/
 	struct request_list *rl;
 
+	/*等待数据传送终止的completion结构*/
 	struct completion *waiting;
+	/*对硬件设备发出“特殊”命令的请求所使用的数据的指针*/
 	void *special;
 
 	/*
 	 * when request is used as a packet command carrier
 	 */
+	/*cmd字段中命令的长度*/
 	unsigned int cmd_len;
+	/*由请求队列的prep_rq_fn方法准备好的预先内置命令所在的缓冲区*/
 	unsigned char cmd[BLK_MAX_CDB];
 
+	/*通常，由data字段指向的缓冲区中数据的长度*/
 	unsigned int data_len;
+	/*设备驱动程序为了跟踪所传送的数据而使用的指针*/
 	void *data;
 
+	/*由sense字段指向的缓冲区的长度(如果sense是NULL,则为0）*/
 	unsigned int sense_len;
+	/*指向输出sense命令的缓冲区的指针*/
 	void *sense;
 
+	/*请求的超时*/
 	unsigned int timeout;
 
 	/*
 	 * For Power Management requests
 	 */
+	/*指向电源管理命令所使用的数据结构*/
 	struct request_pm_state *pm;
 };
 
@@ -219,29 +245,53 @@ enum rq_flag_bits {
 	__REQ_NR_BITS,		/* stops here */
 };
 
+/*数据传送的方向:READ(0) WRITE(1)*/
 #define REQ_RW		(1 << __REQ_RW)
+/*万一出错请求申明不再重试I/O操作*/
 #define REQ_FAILFAST	(1 << __REQ_FAILFAST)
+/*请求相当与I/O调度程序的屏障*/
 #define REQ_SOFTBARRIER	(1 << __REQ_SOFTBARRIER)
+/*请求相当与I/O调度程序和设备驱动程序的屏障--应当在旧请求与新请求之间处理该请求*/
 #define REQ_HARDBARRIER	(1 << __REQ_HARDBARRIER)
+/*包含一个标准的读或写I/O数据传送的请求*/
 #define REQ_CMD		(1 << __REQ_CMD)
+/*不孕需扩展或与其他请求合并的请求*/
 #define REQ_NOMERGE	(1 << __REQ_NOMERGE)
+/*正处理的请求*/
 #define REQ_STARTED	(1 << __REQ_STARTED)
+/*不调用请求队列中的prep_rq_fn方法预先准备把命令发送给硬件设备*/
 #define REQ_DONTPREP	(1 << __REQ_DONTPREP)
+/*请求被标记-也就是说，与该请求相关的硬件设备可以同时管理很多未完成数据的传送*/
 #define REQ_QUEUED	(1 << __REQ_QUEUED)
+/*请求包含发送给硬件设备的直接命令*/
 #define REQ_PC		(1 << __REQ_PC)
+/*与前一个标志功能相同，但发送的命令包含在bio结构中*/
 #define REQ_BLOCK_PC	(1 << __REQ_BLOCK_PC)
+/*请求包含一个sense请求命令(scsi和atapi设备使用)*/
 #define REQ_SENSE	(1 << __REQ_SENSE)
+/*当请求中的sense或direct命令的操作与预期的不一致时设置该标志*/
 #define REQ_FAILED	(1 << __REQ_FAILED)
+/*万一I/O操作出错请求申明不产生内核消息*/
 #define REQ_QUIET	(1 << __REQ_QUIET)
+/*请求包含对该硬件设备的特殊命令(例如，重设驱动器)*/
 #define REQ_SPECIAL	(1 << __REQ_SPECIAL)
+/*请求包含对IDE硬盘的特殊命令*/
 #define REQ_DRIVE_CMD	(1 << __REQ_DRIVE_CMD)
+/*请求包含对IDE硬盘的特殊命令*/
 #define REQ_DRIVE_TASK	(1 << __REQ_DRIVE_TASK)
+/*请求包含对IDE硬盘的特殊命令*/
 #define REQ_DRIVE_TASKFILE	(1 << __REQ_DRIVE_TASKFILE)
+/*请求取代位于请求队列前面的请求(仅对ide磁盘而言)*/
 #define REQ_PREEMPT	(1 << __REQ_PREEMPT)
+/*请求包含一个挂起硬件设备的电源管理的命令*/
 #define REQ_PM_SUSPEND	(1 << __REQ_PM_SUSPEND)
+/*请求包含一个唤醒硬件设备的电源管理命令*/
 #define REQ_PM_RESUME	(1 << __REQ_PM_RESUME)
+/*请求包含一个切断硬件设备的电源管理命令*/
 #define REQ_PM_SHUTDOWN	(1 << __REQ_PM_SHUTDOWN)
+/*请求包含一个要发送给磁盘控制器的“刷新队列”命令*/
 #define REQ_BAR_PREFLUSH	(1 << __REQ_BAR_PREFLUSH)
+/*请求包含一个已发送给磁盘控制器的“刷新队列”命令*/
 #define REQ_BAR_POSTFLUSH	(1 << __REQ_BAR_POSTFLUSH)
 
 /*
@@ -342,6 +392,7 @@ struct request_queue
 	/*去掉设备时使用的操作队列*/
 	struct work_struct	unplug_work;
 
+	/*关于基本硬件块设备的I/O数据流量的信息。例如，保存量关于预读以及关于请求队列拥塞状态的信息*/
 	struct backing_dev_info	backing_dev_info;
 
 	/*

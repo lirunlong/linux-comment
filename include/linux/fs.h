@@ -403,22 +403,38 @@ struct address_space {
 	 */
 
 struct block_device {
+	/*块设备的主设备号和次设备号*/
 	dev_t			bd_dev;  /* not a kdev_t - it's a search key */
+	/*指向bdev文件系统中块设备对应的文件索引节点的指针*/
 	struct inode *		bd_inode;	/* will die */
+	/*计数器，统计块设备已经被打开了多少次*/
 	int			bd_openers;
+	/*保护块设备的打开和关闭的信号量*/
 	struct semaphore	bd_sem;	/* open/close mutex */
+	/*禁止在块设备上进行新安装的信号量*/
 	struct semaphore	bd_mount_sem;	/* mount mutex */
+	/*已打开的块设备的索引节点链表的首部*/
 	struct list_head	bd_inodes;
+	/*块设备描述符的当前所有者*/
 	void *			bd_holder;
+	/*计数器，统计对bd_holder字段多次设置的次数*/
 	int			bd_holders;
+	/*如果块设备是一个分区，则指向整个磁盘的块设备描述符；否则，指向该块设备描述符*/
 	struct block_device *	bd_contains;
+	/*块大小*/
 	unsigned		bd_block_size;
+	/*指向分区描述符的指针(如果该块设备不是一个分区，则为NULL）*/
 	struct hd_struct *	bd_part;
 	/* number of times partitions within this device have been opened. */
+	/*计数器，统计包含在块设备中的分区已经被打开多少次*/
 	unsigned		bd_part_count;
+	/*当需要读块设备的分区表时设置的标志*/
 	int			bd_invalidated;
+	/*指向块设备中基本磁盘的gendisk结构的指针*/
 	struct gendisk *	bd_disk;
+	/*用于块设备描述符链表的指针*/
 	struct list_head	bd_list;
+	/*指向块设备的专门描述符backing_dev_info的指针(通常为NULL)*/
 	struct backing_dev_info *bd_inode_backing_dev_info;
 	/*
 	 * Private data.  You must have bd_claim'ed the block_device
@@ -426,6 +442,7 @@ struct block_device {
 	 * the same device multiple times, the owner must take special
 	 * care to not mess up bd_private for that case.
 	 */
+	/*指向块设备持有者的私有数据的指针*/
 	unsigned long		bd_private;
 };
 

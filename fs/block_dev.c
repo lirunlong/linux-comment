@@ -352,6 +352,7 @@ static int bdev_set(struct inode *inode, void *data)
 	return 0;
 }
 
+/*所有的块设备的(block_device)的链表的头 block_device->bd_list链接所有的块设备*/
 static LIST_HEAD(all_bdevs);
 
 struct block_device *bdget(dev_t dev)

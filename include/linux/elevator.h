@@ -68,6 +68,7 @@ struct elevator_type
 /*
  * each queue has an elevator_queue assoicated with it
  */
+/*标识一个i/o调度算法*/
 struct elevator_queue
 {
 	struct elevator_ops *ops;

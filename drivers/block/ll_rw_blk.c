@@ -2227,6 +2227,7 @@ EXPORT_SYMBOL(blk_put_request);
  * If no queues are congested then just wait for the next request to be
  * returned.
  */
+/*函数挂起当前进程，直到所有请求队列都变为不拥赛或超时已到*/
 long blk_congestion_wait(int rw, long timeout)
 {
 	long ret;
