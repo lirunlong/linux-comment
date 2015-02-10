@@ -183,6 +183,7 @@ static struct timer_list samp_timer = TIMER_INITIALIZER(sample_queue, 0, 0);
  * unregister_netdevice(), which must be called with the rtnl
  * semaphore held.
  */
+/*所有设备的net_device结构放在全局变量dev_base所指的全局链表中*/
 struct net_device *dev_base;
 static struct net_device **dev_tail = &dev_base;
 DEFINE_RWLOCK(dev_base_lock);
@@ -1421,6 +1422,7 @@ static void sample_queue(unsigned long dummy)
  *
  */
 
+/*非NAPI通知内核接受帧*/
 int netif_rx(struct sk_buff *skb)
 {
 	int this_cpu;

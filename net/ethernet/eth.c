@@ -162,12 +162,15 @@ unsigned short eth_type_trans(struct sk_buff *skb, struct net_device *dev)
 	unsigned char *rawp;
 	
 	skb->mac.raw=skb->data;
+	/*data+14 跳过14字节的帧头*/
 	skb_pull(skb,ETH_HLEN);
 	eth = eth_hdr(skb);
 	skb->input_dev = dev;
 	
+	/*第48位为1 表示是广播地址或者是组播地址  反之为单播地址*/
 	if(*eth->h_dest&1)
 	{
+		/*如果这个地址与设备的广播地址相同   则设置包类型为广播包 负责设置为多播包*/
 		if(memcmp(eth->h_dest,dev->broadcast, ETH_ALEN)==0)
 			skb->pkt_type=PACKET_BROADCAST;
 		else
@@ -184,10 +187,12 @@ unsigned short eth_type_trans(struct sk_buff *skb, struct net_device *dev)
 	 
 	else if(1 /*dev->flags&IFF_PROMISC*/)
 	{
+		/*如果目的host与设备的mac地址不一样 ，则假定为其他机器的包， ip层决定转发或者是drop*/
 		if(memcmp(eth->h_dest,dev->dev_addr, ETH_ALEN))
 			skb->pkt_type=PACKET_OTHERHOST;
 	}
 	
+	/*如果h_proto>1536 说明是以太网封装格式， 这两个字段代表帧类型  直接返回*/
 	if (ntohs(eth->h_proto) >= 1536)
 		return eth->h_proto;
 		
@@ -199,6 +204,7 @@ unsigned short eth_type_trans(struct sk_buff *skb, struct net_device *dev)
 	 *	layer. We look for FFFF which isn't a used 802.2 SSAP/DSAP. This
 	 *	won't work for fault tolerant netware but does for the rest.
 	 */
+	/*802.3封装格式*/
 	if (*(unsigned short *)rawp == 0xFFFF)
 		return htons(ETH_P_802_3);
 		

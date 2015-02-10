@@ -230,7 +230,9 @@ struct hh_cache
 
 enum netdev_state_t
 {
+	/*明确用于开启或关闭设备的传输*/
 	__LINK_STATE_XOFF=0,
+	/*设备开启*/
 	__LINK_STATE_START,
 	__LINK_STATE_PRESENT,
 	__LINK_STATE_SCHED,
@@ -269,12 +271,14 @@ struct net_device
 	 * (i.e. as seen by users in the "Space.c" file).  It is the name
 	 * the interface.
 	 */
+	/*设备的名称(如eth0)*/
 	char			name[IFNAMSIZ];
 
 	/*
 	 *	I/O specific fields
 	 *	FIXME: Merge these and struct ifmap into one
 	 */
+	/*描述设备所用的共享内存，用于设备与内核沟通。*/
 	unsigned long		mem_end;	/* shared mem end	*/
 	unsigned long		mem_start;	/* shared mem start	*/
 	unsigned long		base_addr;	/* device I/O address	*/
@@ -285,7 +289,9 @@ struct net_device
 	 *	part of the usual set specified in Space.c.
 	 */
 
+	/*接口所使用的端口类型*/
 	unsigned char		if_port;	/* Selectable AUI, TP,..*/
+	/*设备使用的dma通道(如果有的话)*/
 	unsigned char		dma;		/* DMA channel		*/
 
 	unsigned long		state;
@@ -300,7 +306,9 @@ struct net_device
 	struct net_device	*next_sched;
 
 	/* Interface index. Unique device identifier	*/
+	/*独一无二的ID，当设备以dev_new_index注册时分派给每个设备*/
 	int			ifindex;
+	/*主要是由(虚拟)隧道设备使用，可用于表示抵达隧道另一端的真实设备*/
 	int			iflink;
 
 
@@ -567,14 +575,22 @@ static inline int unregister_gifconf(unsigned int family)
 
 struct softnet_data
 {
+	/*这3个参数由拥塞管理算法使用。*/
 	int			throttle;
 	int			cng_level;
 	int			avg_blog;
+	
+	/*这个队列(在net_dev_init中初始化)用来保存进来的帧(被驱动程序处理前).*/
 	struct sk_buff_head	input_pkt_queue;
+	/*这是一个双向链表，其中的设备都带有输入帧等着被处理。*/
 	struct list_head	poll_list;
+	/*output_queue是设备列表，其中的设备有数据要传输
+	 *completion_queue:是缓冲区列表，其中的缓冲区已成功传输，可以释放掉*/
 	struct net_device	*output_queue;
 	struct sk_buff		*completion_queue;
 
+	/*代表着一个设备已在一个相关连的cpu上为net_rx_action调度以准备执行。这个
+	 * 是由非NAPI驱动程序使用。其名称指的是backlog device(积压设备).*/
 	struct net_device	backlog_dev;	/* Sorry. 8) */
 };
 
