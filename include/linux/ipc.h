@@ -56,15 +56,25 @@ struct ipc_perm
 /* used by in-kernel data structures */
 struct kern_ipc_perm
 {
+	/*保护ipc资源描述符的自旋锁*/
 	spinlock_t	lock;
+	/*如果资源已经释放，则设置该标志*/
 	int		deleted;
+	/*ipc关键字*/
 	key_t		key;
+	/*属主用户ID*/
 	uid_t		uid;
+	/*属主组ID*/
 	gid_t		gid;
+	/*创建者用户ID*/
 	uid_t		cuid;
+	/*创建者组ID*/
 	gid_t		cgid;
+	/*许可权位掩码*/
 	mode_t		mode; 
+	/*位置使用序号*/
 	unsigned long	seq;
+	/*安全结构指针(用于SELinux)*/
 	void		*security;
 };
 

@@ -81,19 +81,28 @@ struct  seminfo {
 
 /* One semaphore structure for each semaphore in the system. */
 struct sem {
+	/*信号量的计数器的值*/
 	int	semval;		/* current value */
+	/*最后一个访问信号两的进程的PID.进程可以使用semctl()封装函数查询该值*/
 	int	sempid;		/* pid of last operation */
 };
 
 /* One sem_array data structure for each set of semaphores in the system. */
 struct sem_array {
 	struct kern_ipc_perm	sem_perm;	/* permissions .. see ipc.h */
+	/*最后一次调用semop()的时间戳*/
 	time_t			sem_otime;	/* last semop time */
+	/*最后一次修改的时间戳*/
 	time_t			sem_ctime;	/* last change time */
+	/*指向第一个sem结构的指针*/
 	struct sem		*sem_base;	/* ptr to first semaphore in array */
+	/*挂起操作*/
 	struct sem_queue	*sem_pending;	/* pending operations to be processed */
+	/*最后一次挂起操作*/
 	struct sem_queue	**sem_pending_last; /* last pending operation */
+	/*取消操作*/
 	struct sem_undo		*undo;		/* undo requests on this array */
+	/*数组中信号量的个数*/
 	unsigned long		sem_nsems;	/* no. of semaphores in array */
 };
 

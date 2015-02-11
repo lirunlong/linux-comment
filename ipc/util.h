@@ -21,12 +21,19 @@ struct ipc_id_ary {
 };
 
 struct ipc_ids {
+	/*已分配IPC资源数*/
 	int in_use;
+	/*在使用的最大位置索引*/
 	int max_id;
+	/*下一个分配的位置使用序号*/
 	unsigned short seq;
+	/*最大位置使用序号*/
 	unsigned short seq_max;
+	/*保护ipc_ids数据结构的信号量*/
 	struct semaphore sem;	
+	/*如果ipc资源无法初始化，则entries字段指向伪数据结构(一般不使用)*/
 	struct ipc_id_ary nullentry;
+	/*指向资源的ipc_id_ary数据结构的指针*/
 	struct ipc_id_ary* entries;
 };
 
