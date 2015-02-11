@@ -44,28 +44,50 @@ enum {
  * conflict with error returns.
  */
 enum {
+	/*标准执行域*/
 	PER_LINUX =		0x0000,
+	/*linux，64位结构中32位物理地址*/
 	PER_LINUX_32BIT =	0x0000 | ADDR_LIMIT_32BIT,
+	/*linux程序，格式为ELF FDPIC*/
 	PER_LINUX_FDPIC =	0x0000 | FDPIC_FUNCPTRS,
+	/*System V release 4*/
 	PER_SVR4 =		0x0001 | STICKY_TIMEOUTS | MMAP_PAGE_ZERO,
+	/*System V release 3*/
 	PER_SVR3 =		0x0002 | STICKY_TIMEOUTS | SHORT_INODE,
+	/*SCO Unix Version 3.2*/
 	PER_SCOSVR3 =		0x0003 | STICKY_TIMEOUTS |
 					 WHOLE_SECONDS | SHORT_INODE,
+	/*SCO OpenServer Release 5*/
 	PER_OSR5 =		0x0003 | STICKY_TIMEOUTS | WHOLE_SECONDS,
+	/*Unix System V/386 Release 3.2.1*/
 	PER_WYSEV386 =		0x0004 | STICKY_TIMEOUTS | SHORT_INODE,
+	/*交互式Unix*/
 	PER_ISCR4 =		0x0005 | STICKY_TIMEOUTS,
+	/*BSD Unix*/
 	PER_BSD =		0x0006,
+	/*SunOS*/
 	PER_SUNOS =		0x0006 | STICKY_TIMEOUTS,
+	/*Xenix*/
 	PER_XENIX =		0x0007 | STICKY_TIMEOUTS | SHORT_INODE,
+	/*64位结构中32位Linux程序模拟(使用4GB用户态地址空间)*/
 	PER_LINUX32 =		0x0008,
+	/*64位结构中32位Linux程序模拟(使用3GB用户态地址空间)*/
 	PER_LINUX32_3GB =	0x0008 | ADDR_LIMIT_3GB,
+	/*SGI Irix-5 32位*/
 	PER_IRIX32 =		0x0009 | STICKY_TIMEOUTS,/* IRIX5 32-bit */
+	/*SGI Irix-6 32位*/
 	PER_IRIXN32 =		0x000a | STICKY_TIMEOUTS,/* IRIX6 new 32-bit */
+	/*SGI Irix-6 64位*/
 	PER_IRIX64 =		0x000b | STICKY_TIMEOUTS,/* IRIX6 64-bit */
+	/*RISC OS*/
 	PER_RISCOS =		0x000c,
+	/*Sun 的Solaris*/
 	PER_SOLARIS =		0x000d | STICKY_TIMEOUTS,
+	/*SCO（正式为Caldera)的Unix Ware7*/
 	PER_UW7 =		0x000e | STICKY_TIMEOUTS | MMAP_PAGE_ZERO,
+	/*Digital UNIX(Compad Tru64 UNIX)*/
 	PER_OSF4 =		0x000f,			 /* OSF/1 v4 */
+	/*HP的HP-UX*/
 	PER_HPUX =		0x0010,
 	PER_MASK =		0x00ff,
 };

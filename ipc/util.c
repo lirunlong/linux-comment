@@ -95,6 +95,7 @@ void __init ipc_init_ids(struct ipc_ids* ids, int size)
  *	Returns the identifier if found or -1 if not.
  */
  
+/*根据key  查询相应的ipc  有没有已经存在*/
 int ipc_findkey(struct ipc_ids* ids, key_t key)
 {
 	int id;

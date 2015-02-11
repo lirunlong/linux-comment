@@ -60,6 +60,7 @@ int core_uses_pid;
 char core_pattern[65] = "core";
 /* The maximal length of core_pattern is also specified in sysctl.c */
 
+/*所有的可执行文件格式对象的链表头*/
 static struct linux_binfmt *formats;
 static DEFINE_RWLOCK(binfmt_lock);
 

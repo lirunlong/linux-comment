@@ -76,15 +76,25 @@ struct shm_info {
 struct shmid_kernel /* private to the kernel */
 {	
 	struct kern_ipc_perm	shm_perm;
+	/*共享段的特殊文件*/
 	struct file *		shm_file;
+	/*共享段的位置索引*/
 	int			id;
+	/*当前附加的内存区数*/
 	unsigned long		shm_nattch;
+	/*内存去字节数*/
 	unsigned long		shm_segsz;
+	/*最后访问时间*/
 	time_t			shm_atim;
+	/*最后分离时间*/
 	time_t			shm_dtim;
+	/*最后修改时间*/
 	time_t			shm_ctim;
+	/*创建者的PID*/
 	pid_t			shm_cprid;
+	/*最后访问进程的pid*/
 	pid_t			shm_lprid;
+	/*锁定在共享内存ram中的用户的user_struct描述符的指针*/
 	struct user_struct	*mlock_user;
 };
 

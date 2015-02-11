@@ -55,8 +55,11 @@ struct linux_binprm{
 struct linux_binfmt {
 	struct linux_binfmt * next;
 	struct module *module;
+	/*通过读存放在可执行文件中的信息 为当前进程建立一个新的执行环境*/
 	int (*load_binary)(struct linux_binprm *, struct  pt_regs * regs);
+	/*用于动态地把一个共享库捆绑到一个已经在运行的进程，这是由uselib()系统调用激活的*/
 	int (*load_shlib)(struct file *);
+	/*在名为core的文件中存放当前进程的执行上下文。*/
 	int (*core_dump)(long signr, struct pt_regs * regs, struct file * file);
 	unsigned long min_coredump;	/* minimal dump size */
 };

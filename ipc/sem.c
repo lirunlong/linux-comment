@@ -192,6 +192,7 @@ static int newary (key_t key, int nsems, int semflg)
 	}
 	used_sems += nsems;
 
+	/*sem 存储在sem_base后面 */
 	sma->sem_base = (struct sem *) &sma[1];
 	/* sma->sem_pending = NULL; */
 	sma->sem_pending_last = &sma->sem_pending;
