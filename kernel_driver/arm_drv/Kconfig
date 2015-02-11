@@ -1,0 +1,32 @@
+#
+# Kconfig for shrek6410 board
+#
+
+menuconfig SHREK_DRV
+	bool "Drivers for shrek6410 board"
+	help
+	  Specific drivers from shrek6410 board
+
+
+if SHREK_DRV
+
+
+config DRV01
+	tristate "Char driver for single buffer"
+	help
+	  xxx
+
+config DRV02
+	tristate "Char driver for multi buffer"
+	help
+	  xxx
+
+config DRV03
+	tristate "Char driver for multi buffer 2"
+	help
+	  xxx
+config DRV_LED
+	tristate "char driver for led"
+	help
+	  xxx
+endif #SHREK_DRV

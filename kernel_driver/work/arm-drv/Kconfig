@@ -1,0 +1,46 @@
+#
+# Kconfig for shrek6410 board
+#
+
+menuconfig SHREK_DRV
+	bool "Drivers for shrek6410 board"
+	help
+	  Specific drivers for shrek6410 board
+
+if SHREK_DRV
+config DRV01
+	tristate "Char driver for single buffer"
+	help
+	  xxx
+
+config DRV02
+	tristate "Char driver for multi buffer"
+	help
+	  xxx
+
+config LED01
+	tristate "Char driver for LEDs"
+	help
+	  support 4 leds, use on|off control
+
+config KEY01
+	tristate "Test driver for keys"
+	help
+	  interrupt test
+
+config TIMER01
+	tristate "Test for software de-quiver"
+	help
+	  timer test
+
+config ATOM01
+	tristate "Test for atomic_t"
+	help
+	  xxx
+
+config SPIN01
+	tristate "Test for spinlock_t"
+	help
+	  xxx
+
+endif #SHREK_DRV

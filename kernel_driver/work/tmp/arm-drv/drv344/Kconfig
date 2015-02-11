@@ -1,0 +1,18 @@
+#
+# Kconfig for shrek6410 board specific drivers
+# author: zht
+# date: 2012-12-04
+#
+
+menuconfig SHREK6410_DRV
+	bool "Driver for shrek6410 board"
+	help
+	  Specific drivers for shrek6410 board
+
+if SHREK6410_DRV
+
+source "drivers/arm-drv/01net/Kconfig"
+source "drivers/arm-drv/02fb/Kconfig"
+
+endif # SHREK6410_DRV
+

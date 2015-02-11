@@ -1,0 +1,87 @@
+#
+# Kconfig for S3C6410 Display controller(FIMD)
+# Author: zht
+# Date: 2012-12-04
+#
+
+menuconfig SHREK_FB
+	bool "Driver for S3C6410 FIMD"
+
+if SHREK_FB
+
+config FB01
+	tristate "FB driver 1 for S3C6410 display controller (FIMD)"
+	select FB_CFB_FILLRECT
+	select FB_CFB_COPYAREA
+	select FB_CFB_IMAGEBLIT
+	---help---
+	  standard frame buffer driver for S3C6410 display controller, support Win0 to Win4
+
+choice
+prompt "Select LCD Type"
+default S3CFB_LCD43
+config S3CFB_LCD43
+	bool "4.3 inch LCD 480*272"
+	---help---
+	  TBA
+
+config S3CFB_LCD5A
+	bool "5.0 inch LCD 640*480"
+	---help---
+	  TBA
+
+config S3CFB_LCD7A
+	bool "7.0 inch LCD 800*480"
+	---help---
+	  TBA
+endchoice
+
+
+config S3CFB_OPTION
+	tristate "Advanced options for S3C Framebuffer"
+	default n
+	---help---
+	  TBA
+
+choice
+depends on S3CFB_OPTION
+prompt "Select BPP(Bits Per Pixel)"
+default S3CFB_BPP_16
+
+config S3CFB_BPP_8
+	bool "8 BPP"
+	---help---
+	  TBA
+
+config S3CFB_BPP_16
+	bool "16 BPP"
+	---help---
+	  TBA
+
+config S3CFB_BPP_24
+	bool "24 BPP(XRGB888)"
+	---help---
+	  TBA
+
+config S3CFB_BPP_28
+	bool "28 BPP(ARGB4888)"
+	---help---
+	  TBA
+endchoice
+
+config S3CFB_NUM
+	int "Number of Windows"
+	depends on S3CFB_OPTION
+	default "1"
+	---help---
+	  TBA
+
+config S3CFB_DOUBLE_BUFFER
+	bool "Enable Double Buffering"
+	depends on S3CFB_OPTION
+	default n
+	---help---
+	  TBA
+
+endif #SHREK_FB
+
