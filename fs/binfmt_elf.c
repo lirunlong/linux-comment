@@ -539,29 +539,37 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 
 	retval = -ENOEXEC;
 	/* First of all, some simple consistency checks */
+	/*如果前4个字节不是"\177ELF",则不是elf可执行文件 返回-ENOEXEC*/
 	if (memcmp(loc->elf_ex.e_ident, ELFMAG, SELFMAG) != 0)
 		goto out;
 
+	/*如果e_type不是可执行文件或者是共享库文件 则返回-ENOEXEC*/
 	if (loc->elf_ex.e_type != ET_EXEC && loc->elf_ex.e_type != ET_DYN)
 		goto out;
+	/*运行体系结构检查*/
 	if (!elf_check_arch(&loc->elf_ex))
 		goto out;
+	/*如果文件不存在mmap() 则返回-ENOEXEC*/
 	if (!bprm->file->f_op||!bprm->file->f_op->mmap)
 		goto out;
 
 	/* Now read in all of the header information */
 
+	/*如果段头部表 与目标平台段头部表大小不一样，则返回-ENOEXEC*/
 	if (loc->elf_ex.e_phentsize != sizeof(struct elf_phdr))
 		goto out;
+	/*检查段头部表的数目*/
 	if (loc->elf_ex.e_phnum < 1 ||
 	 	loc->elf_ex.e_phnum > 65536U / sizeof(struct elf_phdr))
 		goto out;
+	/*段头部表的大小*/
 	size = loc->elf_ex.e_phnum * sizeof(struct elf_phdr);
 	retval = -ENOMEM;
 	elf_phdata = (struct elf_phdr *) kmalloc(size, GFP_KERNEL);
 	if (!elf_phdata)
 		goto out;
 
+	/*读出所有段头部表*/
 	retval = kernel_read(bprm->file, loc->elf_ex.e_phoff, (char *) elf_phdata, size);
 	if (retval != size) {
 		if (retval >= 0)
@@ -597,6 +605,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 	end_data = 0;
 
 	for (i = 0; i < loc->elf_ex.e_phnum; i++) {
+		/*寻找动态连接器*/
 		if (elf_ppnt->p_type == PT_INTERP) {
 			/* This is the program interpreter used for
 			 * shared libraries - for now assume that this
@@ -604,6 +613,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 			 */
 
 			retval = -ENOEXEC;
+			/*如果动态连接器的文件路径大于PATH_MAX,则认为是不正确的 直接返回-ENOEXEC*/
 			if (elf_ppnt->p_filesz > PATH_MAX || 
 			    elf_ppnt->p_filesz < 2)
 				goto out_free_file;
@@ -614,6 +624,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 			if (!elf_interpreter)
 				goto out_free_file;
 
+			/*将elf文件中指定的动态连接器copy到elf_interpreter*/
 			retval = kernel_read(bprm->file, elf_ppnt->p_offset,
 					   elf_interpreter,
 					   elf_ppnt->p_filesz);
@@ -660,6 +671,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 			retval = PTR_ERR(interpreter);
 			if (IS_ERR(interpreter))
 				goto out_free_interp;
+			/*将动态连接器额前128字节读入bprm->buf*/
 			retval = kernel_read(interpreter, 0, bprm->buf, BINPRM_BUF_SIZE);
 			if (retval != BINPRM_BUF_SIZE) {
 				if (retval >= 0)
@@ -677,6 +689,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 
 	elf_ppnt = elf_phdata;
 	for (i = 0; i < loc->elf_ex.e_phnum; i++, elf_ppnt++)
+		/*这个段没有实际数据 只提供一个标志，是否可执行的栈*/
 		if (elf_ppnt->p_type == PT_GNU_STACK) {
 			if (elf_ppnt->p_flags & PF_X)
 				executable_stack = EXSTACK_ENABLE_X;
@@ -684,10 +697,13 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 				executable_stack = EXSTACK_DISABLE_X;
 			break;
 		}
+	/*一个标志 是否由PT_GNU_STACK段*/
 	have_pt_gnu_stack = (i < loc->elf_ex.e_phnum);
 
 	/* Some simple consistency checks for the interpreter */
+	/*动态链接可执行文件都会存在PT_INTERPT段*/
 	if (elf_interpreter) {
+		/*解释系类型 elf a.out*/
 		interpreter_type = INTERPRETER_ELF | INTERPRETER_AOUT;
 
 		/* Now figure out which format our binary is */
@@ -696,10 +712,12 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 		    (N_MAGIC(loc->interp_ex) != QMAGIC))
 			interpreter_type = INTERPRETER_ELF;
 
+		/*如果e_ident!=\177ELF则  不是elf*/
 		if (memcmp(loc->interp_elf_ex.e_ident, ELFMAG, SELFMAG) != 0)
 			interpreter_type &= ~INTERPRETER_ELF;
 
 		retval = -ELIBBAD;
+		/*既不是a.out   也不是elf*/
 		if (!interpreter_type)
 			goto out_free_dentry;
 
@@ -760,12 +778,15 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 	if (elf_read_implies_exec(loc->elf_ex, executable_stack))
 		current->personality |= READ_IMPLIES_EXEC;
 
+	/*选择进程地址空间布局， 灵活布局或者是经典布局*/
 	arch_pick_mmap_layout(current->mm);
 
 	/* Do this so that we can load the interpreter, if need be.  We will
 	   change some of these later */
+	/*分配给进程的页框数设置为0*/
 	current->mm->rss = 0;
 	current->mm->free_area_cache = current->mm->mmap_base;
+	/*建立栈，并且把copy的用户态文件名，环境变量 ，参数，的页  建立也表映射  映射到用户态的栈顶*/
 	retval = setup_arg_pages(bprm, STACK_TOP, executable_stack);
 	if (retval < 0) {
 		send_sig(SIGKILL, current, 0);
@@ -783,6 +804,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 		int elf_prot = 0, elf_flags;
 		unsigned long k, vaddr;
 
+		/*如果不是一个可加载的段， 则循环下一个*/
 		if (elf_ppnt->p_type != PT_LOAD)
 			continue;
 
@@ -821,8 +843,10 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 		elf_flags = MAP_PRIVATE|MAP_DENYWRITE|MAP_EXECUTABLE;
 
 		vaddr = elf_ppnt->p_vaddr;
+		/*ET_EXEC 代表是可执行文件*/
 		if (loc->elf_ex.e_type == ET_EXEC || load_addr_set) {
 			elf_flags |= MAP_FIXED;
+			/*如果是加载动态库文件*/
 		} else if (loc->elf_ex.e_type == ET_DYN) {
 			/* Try and get dynamic programs out of the way of the default mmap
 			   base, as well as whatever program they might try to exec.  This

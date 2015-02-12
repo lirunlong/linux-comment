@@ -933,6 +933,7 @@ int prepare_binprm(struct linux_binprm *bprm)
 		/* Set-uid? */
 		if (mode & S_ISUID) {
 			current->personality &= ~PER_CLEAR_ON_SETID;
+			/*如果setuid  则把有效用户id  设置为文件的属主*/
 			bprm->e_uid = inode->i_uid;
 		}
 
@@ -954,6 +955,7 @@ int prepare_binprm(struct linux_binprm *bprm)
 		return retval;
 
 	memset(bprm->buf,0,BINPRM_BUF_SIZE);
+	/*读可执行文件的前128字节*/
 	return kernel_read(bprm->file,0,bprm->buf,BINPRM_BUF_SIZE);
 }
 
@@ -1173,6 +1175,7 @@ int do_execve(char * filename,
 	if (retval < 0)
 		goto out;
 
+	/*把可执行文件名，环境变量，参数从用户太地址空间copy到分配的页面，这些页最终会映射额进程的用户态地址空间*/
 	retval = copy_strings_kernel(1, &bprm->filename, bprm);
 	if (retval < 0)
 		goto out;

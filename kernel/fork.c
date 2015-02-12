@@ -408,6 +408,7 @@ void mm_release(struct task_struct *tsk, struct mm_struct *mm)
 	deactivate_mm(tsk, mm);
 
 	/* notify parent sleeping on vfork() */
+	/*如果当前进程是通过vfork 创建的  则激活父进程运行*/
 	if (vfork_done) {
 		tsk->vfork_done = NULL;
 		complete(vfork_done);
