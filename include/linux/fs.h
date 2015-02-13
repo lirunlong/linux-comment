@@ -387,7 +387,7 @@ struct address_space {
 	struct address_space_operations *a_ops;	/* methods */
 	/*错误位和内存分配器的标志*/
 	unsigned long		flags;		/* error bits/gfp mask */
-	/*指向拥有者所有者数据的块设备的backing_dev_info的指针*/
+	/*指向拥有所有者数据的块设备的backing_dev_info的指针*/
 	struct backing_dev_info *backing_dev_info; /* device readahead, etc */
 	/*通常是管理private_list链表时使用的自旋锁*/
 	spinlock_t		private_lock;	/* for use by the address_space */

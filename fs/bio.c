@@ -91,6 +91,7 @@ static inline struct bio_vec *bvec_alloc(int gfp_mask, int nr, unsigned long *id
 /*
  * default destructor for a bio allocated with bio_alloc()
  */
+/*释放bio  */
 static void bio_destructor(struct bio *bio)
 {
 	const int pool_idx = BIO_POOL_IDX(bio);
@@ -130,6 +131,7 @@ inline void bio_init(struct bio *bio)
  *   If %__GFP_WAIT is set then we will block on the internal pool waiting
  *   for a &struct bio to become free.
  **/
+/*从内存内池中分配一个bio结构*/
 struct bio *bio_alloc(int gfp_mask, int nr_iovecs)
 {
 	struct bio *bio = mempool_alloc(bio_pool, gfp_mask);
@@ -147,7 +149,9 @@ struct bio *bio_alloc(int gfp_mask, int nr_iovecs)
 				bio = NULL;
 				goto out;
 			}
+			/*设置当前分配的vec的大小所在的bec_array内存池中的索引*/
 			bio->bi_flags |= idx << BIO_POOL_OFFSET;
+			/*设置bio数组中的最大vec*/
 			bio->bi_max_vecs = bvec_array[idx].nr_vecs;
 		}
 		bio->bi_io_vec = bvl;
