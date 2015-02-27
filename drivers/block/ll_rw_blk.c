@@ -1798,6 +1798,7 @@ static struct request *get_request_wait(request_queue_t *q, int rw)
 	return rq;
 }
 
+/*试图从请求队列q的内存池中获得一个空闲的请求描述符，如果内存区不足并且内存池哟港湾，挂起当前进程，返回NULL*/
 struct request *blk_get_request(request_queue_t *q, int rw, int gfp_mask)
 {
 	struct request *rq;
@@ -2387,8 +2388,14 @@ again:
 	if (barrier)
 		goto get_rq;
 
+	/*新的bio是否能和待处理的请求合并*/
 	el_ret = elv_merge(q, &req, bio);
 	switch (el_ret) {
+		/*
+		 *bio结构可作为末尾的bio而插入到某个请求req中，这种情形下，调用q->back_merge_fn方法检查是否可以扩展该请求，
+		 *不行，则break，创建新request。
+		 *否则，将bio描述符插入req链表的末尾并更新req的相应字段，然后，试图将该请求与其后面的请求合并
+		 */
 		case ELEVATOR_BACK_MERGE:
 			BUG_ON(!rq_mergeable(req));
 
@@ -2403,6 +2410,11 @@ again:
 				elv_merged_request(q, req);
 			goto out;
 
+			/*
+			 *bio结构可作为某个请求req的第一个bio被插入，
+			 *调用q->front_merge_fn检查是否可以扩展该请求。不行，则break，创建新请求
+			 *否则，将bio描述符插入req链表的首部并更新req的相应字段值。然后，试图将该请求与其前面的请求合并
+			 */
 		case ELEVATOR_FRONT_MERGE:
 			BUG_ON(!rq_mergeable(req));
 
@@ -2430,6 +2442,7 @@ again:
 		/*
 		 * elevator says don't/can't merge. get new request
 		 */
+			/*不能merge  创建新的request*/
 		case ELEVATOR_NO_MERGE:
 			break;
 

@@ -94,10 +94,15 @@ void copy_io_context(struct io_context **pdst, struct io_context **psrc);
 void swap_io_context(struct io_context **ioc1, struct io_context **ioc2);
 
 struct request_list {
+	/*两个计数器，分别用于记录分配给READ和WRITE请求的请求描述符数*/
 	int count[2];
+	/*两个标志，分别用于标记为读或写请求的分配是否失败*/
 	int starved[2];
+	/*一个指针，指向请求描述符的内存池*/
 	mempool_t *rq_pool;
+	/*两个等待队列，分别存放了为获得空闲的读和写请求描述符而睡眠的进程*/
 	wait_queue_head_t wait[2];
+	/*一个等待队列，存放等待一个请求队列被刷新(清空)的进程*/
 	wait_queue_head_t drain;
 };
 
@@ -436,7 +441,7 @@ struct request_queue
 	 */
 	/*请求队列中允许的最大请求数*/
 	unsigned long		nr_requests;	/* Max # of requests */
-	/*如果待处理请求数超出里该阀值，则认为该队列是拥挤的*/
+	/*如果待处理请求数超出了该阀值，则认为该队列是拥挤的*/
 	unsigned int		nr_congestion_on;
 	/*如果待处理请求数在这个阀值的范围内，则认为该队列是不拥挤的*/
 	unsigned int		nr_congestion_off;

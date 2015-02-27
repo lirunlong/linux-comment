@@ -432,7 +432,7 @@ struct block_device {
 	int			bd_invalidated;
 	/*指向块设备中基本磁盘的gendisk结构的指针*/
 	struct gendisk *	bd_disk;
-	/*用于块设备描述符链表的指针*/
+	/*用于块设备描述符链表的指针(表头all_bdevs)*/
 	struct list_head	bd_list;
 	/*指向块设备的专门描述符backing_dev_info的指针(通常为NULL)*/
 	struct backing_dev_info *bd_inode_backing_dev_info;
