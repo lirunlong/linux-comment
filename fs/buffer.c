@@ -1186,6 +1186,7 @@ failed:
  * some of those buffers may be aliases of filesystem data.
  * grow_dev_page() will go BUG() if this happens.
  */
+/*把块设备缓冲区页添加到页高速缓存中*/
 static inline int
 grow_buffers(struct block_device *bdev, sector_t block, int size)
 {
@@ -1447,6 +1448,7 @@ lookup_bh_lru(struct block_device *bdev, sector_t block, int size)
  * it in the LRU and mark it as accessed.  If it is not present then return
  * NULL
  */
+/*页高速缓存中搜索块*/
 struct buffer_head *
 __find_get_block(struct block_device *bdev, sector_t block, int size)
 {
@@ -2722,6 +2724,7 @@ int submit_bh(int rw, struct buffer_head * bh)
 	 */
 	bio = bio_alloc(GFP_NOIO, 1);
 
+	/*设置起始扇区*/
 	bio->bi_sector = bh->b_blocknr * (bh->b_size >> 9);
 	bio->bi_bdev = bh->b_bdev;
 	bio->bi_io_vec[0].bv_page = bh->b_page;
@@ -2996,6 +2999,7 @@ static void recalc_bh_state(void)
 	buffer_heads_over_limit = (tot > max_buffer_heads);
 }
 	
+/*分配缓冲区首部*/
 struct buffer_head *alloc_buffer_head(int gfp_flags)
 {
 	struct buffer_head *ret = kmem_cache_alloc(bh_cachep, gfp_flags);
@@ -3009,6 +3013,7 @@ struct buffer_head *alloc_buffer_head(int gfp_flags)
 }
 EXPORT_SYMBOL(alloc_buffer_head);
 
+/*释放传冲去首部*/
 void free_buffer_head(struct buffer_head *bh)
 {
 	BUG_ON(!list_empty(&bh->b_assoc_buffers));

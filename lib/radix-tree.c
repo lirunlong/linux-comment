@@ -291,6 +291,7 @@ void *radix_tree_lookup(struct radix_tree_root *root, unsigned long index)
 	struct radix_tree_node **slot;
 
 	height = root->height;
+	/*如果查找的索引 大于当前高度所能标识的最大索引， 则返回NULL*/
 	if (index > radix_tree_maxindex(height))
 		return NULL;
 
