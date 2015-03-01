@@ -44,36 +44,56 @@ struct kioctx;
 #define kiocbIsCancelled(iocb)	test_bit(KIF_CANCELLED, &(iocb)->ki_flags)
 
 struct kiocb {
+	/*以后要重新操作的I/O链表指针*/
 	struct list_head	ki_run_list;
+	/*kiocb描述符的标志*/
 	long			ki_flags;
+	/*kiocb描述符的引用计数器*/
 	int			ki_users;
+	/*异步I/O操作标识符，同步I/O 操作标识符为KIOCB_SYNC_KEY(0xffffffff)*/
 	unsigned		ki_key;		/* id of this request */
 
+	/*与正在进行的I/O操作相关的文件对象的指针*/
 	struct file		*ki_filp;
+	/*异步I/O环境描述符指针*/
 	struct kioctx		*ki_ctx;	/* may be NULL for sync ops */
+	/*当取下异步I/O操作时所调用的方法*/
 	int			(*ki_cancel)(struct kiocb *, struct io_event *);
+	/*当重试异步I/O操作时所调用的方法*/
 	ssize_t			(*ki_retry)(struct kiocb *);
+	/*当清除kiocb描述符时所调用的方法*/
 	void			(*ki_dtor)(struct kiocb *);
 
+	/*在异步操作环境下，当前进行的I/O操作链表的指针*/
 	struct list_head	ki_list;	/* the aio core uses this
 						 * for cancellation */
 
+	/*对于同步操作，它是指向发出该操作的进程描述符的指针；
+	 * 对于异步操作，它是指向用户态数据结构iocb的指针*/
 	union {
 		void __user		*user;
 		struct task_struct	*tsk;
 	} ki_obj;
+	/*给用户态进程返回的值*/
 	__u64			ki_user_data;	/* user's data for completion */
+	/*正在进行I/O操作的当前文件位置*/
 	loff_t			ki_pos;
 	/* State that we remember to be able to restart/retry  */
+	/*操作类型(read,write,sync)*/
 	unsigned short		ki_opcode;
+	/*被传输的字节数*/
 	size_t			ki_nbytes; 	/* copy of iocb->aio_nbytes */
+	/*用户态缓冲区的当前位置*/
 	char 			__user *ki_buf;	/* remaining iocb->aio_buf */
+	/*待传输的字节数*/
 	size_t			ki_left; 	/* remaining bytes */
+	/*异步I/O操作等待队列*/
 	wait_queue_t		ki_wait;
 	long			ki_retried; 	/* just for testing */
 	long			ki_kicked; 	/* just for testing */
 	long			ki_queued; 	/* just for testing */
 
+	/*由文件系统层自由使用*/
 	void			*private;
 };
 

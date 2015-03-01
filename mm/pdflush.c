@@ -80,13 +80,19 @@ static unsigned long last_empty_jifs;
  * state information between pdflush threads.  Protected by pdflush_lock.
  */
 struct pdflush_work {
+	/*指向内核线程描述符指针*/
 	struct task_struct *who;	/* The thread */
+	/*内核线程所执行的回调函数*/
 	void (*fn)(unsigned long);	/* A callback function */
+	/*回调函数参数*/
 	unsigned long arg0;		/* An argument to the callback */
+	/*pdflush_list链表的链接*/
 	struct list_head list;		/* On pdflush_list, when idle */
+	/*当内核线程可用时的时间*/
 	unsigned long when_i_went_to_sleep;
 };
 
+/*pdflush执行的函数*/
 static int __pdflush(struct pdflush_work *my_work)
 {
 	current->flags |= PF_FLUSHER;
@@ -184,6 +190,7 @@ static int pdflush(void *dummy)
  * Returns zero if it indeed managed to find a worker thread, and passed your
  * payload to it.
  */
+/*激活空闲的pdflush内核线程*/
 int pdflush_operation(void (*fn)(unsigned long), unsigned long arg0)
 {
 	unsigned long flags;

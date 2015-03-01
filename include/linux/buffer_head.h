@@ -24,7 +24,7 @@ enum bh_state_bits {
 	/*如果已经为初始化缓冲区而请求数据传输就置位*/
 	BH_Req,		/* Has been submitted for I/O */
 
-	/*如果缓冲区被映射到磁盘就置位，即：如果相应的缓冲区首部的b_bdev和b_blocknr是有效的就置位*/
+	/*如果缓冲区被映射到磁盘就置位，即：如果相应的缓冲区首部的b_bdev 和b_blocknr是有效的就置位*/
 	BH_Mapped,	/* Has a disk mapping */
 	/*如果相应的块刚被分配而还没有被访问过就置位*/
 	BH_New,		/* Disk mapping was newly created by get_block */
@@ -38,7 +38,7 @@ enum bh_state_bits {
 	BH_Boundary,	/* Block is followed by a discontiguity */
 	/*如果写块时出现I/O错误就置位*/
 	BH_Write_EIO,	/* I/O error on write */
-	/*如果必须严格地把块写到在它之前提交的块的后面就置位(用于日志文件系统)*/
+	/*如果必须严格地把块写到在它之前提交的块的后面就置位（用于日志文件系统）*/
 	BH_Ordered,	/* ordered write */
 	/*如果块设备的驱动程序不支持所请求的操作就置位*/
 	BH_Eopnotsupp,	/* operation not supported (barrier) */
@@ -62,7 +62,8 @@ typedef void (bh_end_io_t)(struct buffer_head *bh, int uptodate);
  */
 struct buffer_head {
 	/* First cache line: */
-	/*缓冲区状态标志*/
+	/*缓冲区状态标志
+	 *如:BH_Uptodate等*/
 	unsigned long b_state;		/* buffer state bitmap (see above) */
 	/*指向缓冲区页的链表中的下一个元素的指针*/
 	struct buffer_head *b_this_page;/* circular list of page's buffers */
@@ -84,7 +85,7 @@ struct buffer_head {
 	bh_end_io_t *b_end_io;		/* I/O completion */
 	/*指向I/O完成方法数据的指针*/
  	void *b_private;		/* reserved for b_end_io */
-	/*为与某个索引结点相关的间接块的链表的指针*/
+	/*为与某个索引节点相关的间接块的链表提供的指针*/
 	struct list_head b_assoc_buffers; /* associated with another mapping */
 };
 
