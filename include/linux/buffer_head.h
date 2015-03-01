@@ -15,19 +15,32 @@
 #include <asm/atomic.h>
 
 enum bh_state_bits {
+	/*缓冲区包含有效数据时被置位*/
 	BH_Uptodate,	/* Contains valid data */
+	/*如果缓冲区脏就置位(表示缓冲区中的数据必须写回设备)*/
 	BH_Dirty,	/* Is dirty */
+	/*如果缓冲区加锁就置位，通常发生在缓冲区进行磁盘传输时*/
 	BH_Lock,	/* Is locked */
+	/*如果已经为初始化缓冲区而请求数据传输就置位*/
 	BH_Req,		/* Has been submitted for I/O */
 
+	/*如果缓冲区被映射到磁盘就置位，即：如果相应的缓冲区首部的b_bdev和b_blocknr是有效的就置位*/
 	BH_Mapped,	/* Has a disk mapping */
+	/*如果相应的块刚被分配而还没有被访问过就置位*/
 	BH_New,		/* Disk mapping was newly created by get_block */
+	/*如果在异步地读缓冲区就置位*/
 	BH_Async_Read,	/* Is under end_buffer_async_read I/O */
+	/*如果在异步地写缓冲区就置位*/
 	BH_Async_Write,	/* Is under end_buffer_async_write I/O */
+	/*如果还没有在磁盘上分配缓冲区就置位*/
 	BH_Delay,	/* Buffer is not yet allocated on disk */
+	/*如果两个相邻的块在其中一个提交之后不再相邻就置位*/
 	BH_Boundary,	/* Block is followed by a discontiguity */
+	/*如果写块时出现I/O错误就置位*/
 	BH_Write_EIO,	/* I/O error on write */
+	/*如果必须严格地把块写到在它之前提交的块的后面就置位(用于日志文件系统)*/
 	BH_Ordered,	/* ordered write */
+	/*如果块设备的驱动程序不支持所请求的操作就置位*/
 	BH_Eopnotsupp,	/* operation not supported (barrier) */
 
 	BH_PrivateStart,/* not a state bit, but the first bit available
@@ -49,22 +62,29 @@ typedef void (bh_end_io_t)(struct buffer_head *bh, int uptodate);
  */
 struct buffer_head {
 	/* First cache line: */
+	/*缓冲区状态标志*/
 	unsigned long b_state;		/* buffer state bitmap (see above) */
+	/*指向缓冲区页的链表中的下一个元素的指针*/
 	struct buffer_head *b_this_page;/* circular list of page's buffers */
 	/*块缓冲区所在页框的页描述符地址*/
 	struct page *b_page;		/* the page this bh is mapped to */
+	/*块使用计数器*/
 	atomic_t b_count;		/* users using this block */
+	/*块大小*/
 	u32 b_size;			/* block size */
 
-	/*逻辑块号*/
+	/*与块设备相关的块号，逻辑块号*/
 	sector_t b_blocknr;		/* block number */
 	/*如果页框位于高度内存，b_data字段存放页中块缓冲区的偏移量，否则存放缓冲区本身的起始先行地址*/
 	char *b_data;			/* pointer to data block */
 
 	/*缓冲区首部的块设备*/
 	struct block_device *b_bdev;
+	/*I/O完成方法*/
 	bh_end_io_t *b_end_io;		/* I/O completion */
+	/*指向I/O完成方法数据的指针*/
  	void *b_private;		/* reserved for b_end_io */
+	/*为与某个索引结点相关的间接块的链表的指针*/
 	struct list_head b_assoc_buffers; /* associated with another mapping */
 };
 

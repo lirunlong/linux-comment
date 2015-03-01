@@ -470,6 +470,7 @@ EXPORT_SYMBOL(__lock_page);
  * a rather lightweight function, finding and getting a reference to a
  * hashed page atomically.
  */
+/*从页高速缓存中返回一个页*/
 struct page * find_get_page(struct address_space *mapping, unsigned long offset)
 {
 	struct page *page;
