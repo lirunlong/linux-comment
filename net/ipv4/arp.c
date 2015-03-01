@@ -202,6 +202,7 @@ struct neigh_table arp_tbl = {
 	.gc_thresh3 =	1024,
 };
 
+/*L3多播地址到L2地址的解析，不需要协议*/
 int arp_mc_map(u32 addr, u8 *haddr, struct net_device *dev, int dir)
 {
 	switch (dev->type) {

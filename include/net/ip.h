@@ -216,6 +216,7 @@ static inline void ip_select_ident_more(struct iphdr *iph, struct dst_entry *dst
  *	Map a multicast IP onto multicast MAC for type ethernet.
  */
 
+/*多播地址高24位为IANA分配的01:00:5E 第23位为0  盛夏23位为ip地址的低23位*/
 static inline void ip_eth_mc_map(u32 addr, char *buf)
 {
 	addr=ntohl(addr);
