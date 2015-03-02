@@ -668,16 +668,27 @@ struct fown_struct {
 /*
  * Track a single file's readahead state
  */
+/*预读算法使用*/
 struct file_ra_state {
+	/*当前窗内第一页的索引*/
 	unsigned long start;		/* Current window */
+	/*当前窗内的页数(当临时禁止预读时为-1，0表示当前窗空)*/
 	unsigned long size;
+	/*控制预读的一些标志*/
 	unsigned long flags;		/* ra flags RA_FLAG_xxx*/
+	/*连续高速缓存命中数(进程请求的页同时又在页高速缓存内)*/
 	unsigned long cache_hit;	/* cache hit count*/
+	/*进程请求的最后一页的索引*/
 	unsigned long prev_page;	/* Cache last read() position */
+	/*预读窗内第一页的索引*/
 	unsigned long ahead_start;	/* Ahead window */
+	/*预读窗的页数(0标识预读窗口空)*/
 	unsigned long ahead_size;
+	/*预读窗的最大页数(0标识预读窗永久禁止)*/
 	unsigned long ra_pages;		/* Maximum readahead window */
+	/*预读命中计数器(用于内存映射文件)*/
 	unsigned long mmap_hit;		/* Cache hit stat for mmap accesses */
+	/*预读失败计数器(用于内存映射文件)*/
 	unsigned long mmap_miss;	/* Cache miss stat for mmap accesses */
 };
 #define RA_FLAG_MISS 0x01	/* a cache miss occured against this file */
@@ -1087,12 +1098,16 @@ struct block_device_operations {
  * mode.
  */
 typedef struct {
+	/*已经拷贝到用户态缓冲区的字节数*/
 	size_t written;
+	/*待传送的字节数*/
 	size_t count;
 	union {
+		/*用户态缓冲区的当前位置*/
 		char __user * buf;
 		void *data;
 	} arg;
+	/*读操作的错误码(0表示无错误)*/
 	int error;
 } read_descriptor_t;
 

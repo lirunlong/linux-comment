@@ -704,21 +704,30 @@ void do_generic_mapping_read(struct address_space *mapping,
 
 	cached_page = NULL;
 	index = *ppos >> PAGE_CACHE_SHIFT;
+	/*本次需要读的数据所在的页面在文件中的偏移*/
 	next_index = index;
+	/*上次读的页偏移*/
 	prev_index = ra.prev_page;
+	/*需要读的页面的个数*/
 	req_size = (desc->count + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
+	/*在页面内的偏移*/
 	offset = *ppos & ~PAGE_CACHE_MASK;
 
+	/*文件总大小*/
 	isize = i_size_read(inode);
 	if (!isize)
 		goto out;
 
+	/*文件尾的页偏移*/
 	end_index = (isize - 1) >> PAGE_CACHE_SHIFT;
 	for (;;) {
 		struct page *page;
 		unsigned long ret_size, nr, ret;
 
 		/* nr is the maximum number of bytes to copy from this page */
+		/*
+		 * 一次循环最多只能读一个页面缓存，不能跨缓存， 所以nr=nr-offset
+		 * */
 		nr = PAGE_CACHE_SIZE;
 		if (index >= end_index) {
 			if (index > end_index)
@@ -740,6 +749,7 @@ void do_generic_mapping_read(struct address_space *mapping,
 
 find_page:
 		page = find_get_page(mapping, index);
+		/*所读的数据不在高速缓存中*/
 		if (unlikely(page == NULL)) {
 			handle_ra_miss(mapping, &ra, index);
 			goto no_cached_page;
@@ -808,6 +818,7 @@ readpage:
 			goto readpage_error;
 
 		if (!PageUptodate(page)) {
+			/*阻塞，直到另外一个执行流释放锁*/
 			lock_page(page);
 			if (!PageUptodate(page)) {
 				if (page->mapping == NULL) {
@@ -895,6 +906,7 @@ out:
 
 EXPORT_SYMBOL(do_generic_mapping_read);
 
+/*把数据从页高速缓存copy到用户地址空间*/
 int file_read_actor(read_descriptor_t *desc, struct page *page,
 			unsigned long offset, unsigned long size)
 {
@@ -1003,7 +1015,7 @@ __generic_file_aio_read(struct kiocb *iocb, const struct iovec *iov,
 			desc.error = 0;
 			do_generic_file_read(filp,ppos,&desc,file_read_actor);
 			retval += desc.written;
-			if (!retval) {
+			if (!retval) {/*如果没有读到任何数组，则把desc的错误设置为返回值*/
 				retval = desc.error;
 				break;
 			}
