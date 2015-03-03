@@ -547,6 +547,7 @@ static int try_to_unmap_one(struct page *page, struct vm_area_struct *vma)
 	 * skipped over this mm) then we should reactivate it.
 	 */
 	if ((vma->vm_flags & (VM_LOCKED|VM_RESERVED)) ||
+			/*页表项 Accessed标志*/
 			ptep_clear_flush_young(vma, address, pte)) {
 		ret = SWAP_FAIL;
 		goto out_unmap;

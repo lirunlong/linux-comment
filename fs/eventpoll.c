@@ -534,6 +534,7 @@ sys_epoll_ctl(int epfd, int op, int fd, struct epoll_event __user *event)
 		     current, epfd, op, fd, event));
 
 	error = -EFAULT;
+	/*如果不是del  则event参数有效，把参数从用户态copy到内核态*/
 	if (EP_OP_HASH_EVENT(op) &&
 	    copy_from_user(&epds, event, sizeof(struct epoll_event)))
 		goto eexit_1;
@@ -567,6 +568,7 @@ sys_epoll_ctl(int epfd, int op, int fd, struct epoll_event __user *event)
 	 * At this point it is safe to assume that the "private_data" contains
 	 * our own data structure.
 	 */
+	/*event_poll结构体存储在file-private变量中，在sys_epoll_create->ep_file_init(file)*/
 	ep = file->private_data;
 
 	down_write(&ep->sem);

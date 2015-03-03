@@ -282,7 +282,10 @@ struct page {
 					 * When page is free, this indicates
 					 * order in the buddy system.
 					 */
-	/*当页被插入页告诉缓存中时使用，或者页属于匿名区时使用*/
+	/*当页被插入页高速缓存中时使用，或者页属于匿名区时使用
+	 * 如果为NULL，该页属于交换高速缓存
+	 * 最低位为0：标识该页为映射页
+	 * 最低位为1：表示该页为匿名页，指向anon_vma描述符的指针*/
 	struct address_space *mapping;	/* If low bit clear, points to
 					 * inode address_space, or NULL.
 					 * If page mapped as anonymous
